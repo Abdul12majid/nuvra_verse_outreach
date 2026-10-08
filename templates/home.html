@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Comic Outreach{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <h1 class="mb-4">Dashboard</h1>
+    <p class="text-muted">
+      Scaffolding stage. Reddit discovery, signals, and the shortlist UI arrive in the next stages.
+    </p>
+    <div class="row g-3">
+      <div class="col-md-3">
+        <div class="card"><div class="card-body">
+          <h5 class="card-title">Leads</h5>
+          <p class="display-6">{{ lead_count }}</p>
+        </div></div>
+      </div>
+      <div class="col-md-3">
+        <div class="card"><div class="card-body">
+          <h5 class="card-title">Signals</h5>
+          <p class="display-6">{{ signal_count }}</p>
+        </div></div>
+      </div>
+      <div class="col-md-3">
+        <div class="card"><div class="card-body">
+          <h5 class="card-title">Outreach sent</h5>
+          <p class="display-6">{{ outreach_count }}</p>
+        </div></div>
+      </div>
+      <div class="col-md-3">
+        <div class="card"><div class="card-body">
+          <h5 class="card-title">Responses</h5>
+          <p class="display-6">{{ response_count }}</p>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
