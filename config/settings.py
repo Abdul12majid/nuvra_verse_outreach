@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'reddit_app',
     'core'
+    'discord_app',
 ]
 
 MIDDLEWARE = [
