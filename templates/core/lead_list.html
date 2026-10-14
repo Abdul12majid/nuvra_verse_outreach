@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Leads — Comic Outreach{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Leads</h1>
+  <span class="text-muted">{{ page.paginator.count }} total</span>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-3">
+    <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search name, bio, id…">
+  </div>
+  <div class="col-md-2">
+    <select name="source" class="form-select">
+      <option value="">All sources</option>
+      {% for value, label in sources %}
+        <option value="{{ value }}" {% if current_source == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <select name="status" class="form-select">
+      <option value="">All statuses</option>
+      {% for value, label in statuses %}
+        <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2 form-check ms-2 mt-2">
+    <input type="checkbox" name="has_signals" value="1" class="form-check-input" id="hasSignals"
+           {% if current_has_signals == "1" %}checked{% endif %}>
+    <label class="form-check-label" for="hasSignals">Only with signals</label>
+  </div>
+  <div class="col-md-2">
+    <button class="btn btn-primary">Filter</button>
+    <a href="{% url 'core:lead_list' %}" class="btn btn-outline-secondary">Reset</a>
+  </div>
+</form>
+
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Source</th>
+      <th>Status</th>
+      <th class="text-end">Signals</th>
+      <th class="text-end">Score</th>
+      <th>Last seen</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for lead in page %}
+    <tr>
+      <td>{{ lead.pk }}</td>
+      <td><a href="{% url 'core:lead_detail' lead.pk %}">{{ lead.display_name|default:lead.source_uid }}</a></td>
+      <td><span class="badge bg-secondary">{{ lead.get_source_display }}</span></td>
+      <td>{{ lead.get_status_display }}</td>
+      <td class="text-end">{{ lead.signal_count }}</td>
+      <td class="text-end"><span class="badge bg-primary">{{ lead.signal_score }}</span></td>
+      <td><small class="text-muted">{{ lead.last_seen_at|date:"Y-m-d H:i" }}</small></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" class="text-muted text-center py-4">No leads match these filters.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% include "core/_pagination.html" with page=page %}
+{% endblock %}

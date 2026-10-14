@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}{{ lead.display_name|default:lead.source_uid }} — Lead{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div>
+    <h1 class="mb-1">{{ lead.display_name|default:lead.source_uid }}</h1>
+    <div class="text-muted">
+      <span class="badge bg-secondary">{{ lead.get_source_display }}</span>
+      {% if username %}<span class="ms-2">@{{ username }}</span>{% endif %}
+      <span class="ms-2">uid: {{ lead.source_uid }}</span>
+    </div>
+  </div>
+  <div class="text-end">
+    <div class="mb-1"><span class="badge bg-primary">score {{ lead.signal_score }}</span></div>
+    <div class="text-muted small">{{ lead.signal_count }} signal{{ lead.signal_count|pluralize }}</div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card mb-3">
+      <div class="card-header"><strong>Profile</strong></div>
+      <div class="card-body">
+        <dl class="row mb-0 small">
+          <dt class="col-5">Status</dt><dd class="col-7">{{ lead.get_status_display }}</dd>
+          <dt class="col-5">Source</dt><dd class="col-7">{{ lead.get_source_display }}</dd>
+          {% if lead.source_url %}
+          <dt class="col-5">Link</dt>
+          <dd class="col-7"><a href="{{ lead.source_url }}" target="_blank" rel="noopener">open</a></dd>
+          {% endif %}
+          <dt class="col-5">First seen</dt><dd class="col-7">{{ lead.first_seen_at|date:"Y-m-d H:i" }}</dd>
+          <dt class="col-5">Last seen</dt><dd class="col-7">{{ lead.last_seen_at|date:"Y-m-d H:i" }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><strong>Change status</strong></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="set_status">
+          <div class="input-group">
+            <select name="status" class="form-select">
+              {% for value, label in statuses %}
+                <option value="{{ value }}" {% if lead.status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% if lead.bio %}
+    <div class="card">
+      <div class="card-header"><strong>Bio</strong></div>
+      <div class="card-body small">{{ lead.bio|linebreaksbr }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card mb-3">
+      <div class="card-header"><strong>Signals ({{ signals|length }})</strong></div>
+      <ul class="list-group list-group-flush">
+        {% for s in signals %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <span>
+              <span class="badge bg-info signal-badge">{{ s.get_signal_type_display }}</span>
+              <span class="badge bg-light text-dark signal-badge">conf {{ s.confidence }}</span>
+            </span>
+            <small class="text-muted">{{ s.detected_at|date:"Y-m-d H:i" }}</small>
+          </div>
+          {% if s.summary %}<div class="mt-1">{{ s.summary }}</div>{% endif %}
+          {% if s.evidence %}<div class="small text-muted mt-1 fst-italic">"{{ s.evidence }}"</div>{% endif %}
+          {% if s.source_url %}
+          <div class="mt-1"><a href="{{ s.source_url }}" target="_blank" rel="noopener" class="small">view source →</a></div>
+          {% endif %}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No signals yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><strong>Outreach ({{ outreaches|length }})</strong></div>
+      <ul class="list-group list-group-flush">
+        {% for o in outreaches %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <span>
+              <span class="badge bg-secondary signal-badge">{{ o.get_channel_display }}</span>
+              <span class="badge bg-light text-dark signal-badge">{{ o.get_send_method_display }}</span>
+              <span class="badge bg-light text-dark signal-badge">{{ o.get_status_display }}</span>
+            </span>
+            <small class="text-muted">{{ o.created_at|date:"Y-m-d H:i" }}</small>
+          </div>
+          {% if o.subject %}<div class="mt-1 fw-semibold">{{ o.subject }}</div>{% endif %}
+          {% if o.body %}<div class="small text-muted mt-1">{{ o.body|truncatechars:200 }}</div>{% endif %}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No outreach yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><strong>Responses ({{ responses|length }})</strong></div>
+      <ul class="list-group list-group-flush">
+        {% for r in responses %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <span class="badge bg-secondary signal-badge">{{ r.get_channel_display }}</span>
+            <small class="text-muted">{{ r.received_at|date:"Y-m-d H:i" }}</small>
+          </div>
+          <div class="small mt-1">{{ r.body|truncatechars:200 }}</div>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No responses yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
