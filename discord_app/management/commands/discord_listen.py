@@ -83,6 +83,9 @@ class Command(BaseCommand):
             display_name=str(author),
             source_url=f"https://discord.com/users/{author.id}",
             raw_data={
+                "username": author.name,
+                "display_name": author.display_name,
+                "discriminator": getattr(author, "discriminator", "0"),
                 "guild_id": str(guild.id) if guild else "",
                 "guild_name": guild.name if guild else "",
                 "channel_id": str(message.channel.id),

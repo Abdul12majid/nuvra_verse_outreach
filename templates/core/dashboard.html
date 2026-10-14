@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Comic Outreach{% endblock %}
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card"><div class="card-body">
+      <h6 class="text-muted text-uppercase small">Leads</h6>
+      <p class="display-6 mb-0">{{ lead_count }}</p>
+      <a href="{% url 'core:lead_list' %}" class="small">View all →</a>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card"><div class="card-body">
+      <h6 class="text-muted text-uppercase small">Signals</h6>
+      <p class="display-6 mb-0">{{ signal_count }}</p>
+      <a href="{% url 'core:signal_list' %}" class="small">View all →</a>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card"><div class="card-body">
+      <h6 class="text-muted text-uppercase small">Outreach sent</h6>
+      <p class="display-6 mb-0">{{ outreach_count }}</p>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card"><div class="card-body">
+      <h6 class="text-muted text-uppercase small">Responses</h6>
+      <p class="display-6 mb-0">{{ response_count }}</p>
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><strong>Top leads by signal score</strong></div>
+      <ul class="list-group list-group-flush">
+        {% for lead in top_leads %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <a href="{% url 'core:lead_detail' lead.pk %}">{{ lead.display_name|default:lead.source_uid }}</a>
+            <span class="badge bg-secondary signal-badge ms-2">{{ lead.source }}</span>
+          </div>
+          <span class="badge bg-primary">{{ lead.signal_score }}</span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No leads with signals yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><strong>Recent signals</strong></div>
+      <ul class="list-group list-group-flush">
+        {% for s in recent_signals %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <span>
+              <span class="badge bg-info signal-badge">{{ s.signal_type }}</span>
+              <a href="{% url 'core:lead_detail' s.lead.pk %}" class="ms-2">
+                {{ s.lead.display_name|default:s.lead.source_uid }}
+              </a>
+            </span>
+            <small class="text-muted">{{ s.detected_at|date:"Y-m-d H:i" }}</small>
+          </div>
+          {% if s.evidence %}
+          <div class="small text-muted mt-1">{{ s.evidence|truncatechars:120 }}</div>
+          {% endif %}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No signals yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

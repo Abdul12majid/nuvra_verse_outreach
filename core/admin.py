@@ -12,10 +12,14 @@ from .models import (
 
 @admin.register(Lead)
 class LeadAdmin(admin.ModelAdmin):
-    list_display = ("id", "source", "display_name", "status", "signal_score", "signal_count", "last_seen_at")
+    list_display = ("id", "source", "display_name", "username_col", "status", "signal_score", "signal_count", "last_seen_at")
     list_filter = ("source", "status")
     search_fields = ("display_name", "source_uid", "headline", "bio")
     ordering = ("-signal_score", "-last_seen_at")
+
+    @admin.display(description="username")
+    def username_col(self, obj):
+        return (obj.raw_data or {}).get("username", "")
 
 
 @admin.register(Signal)
