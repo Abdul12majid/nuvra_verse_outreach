@@ -95,6 +95,129 @@ _RULES: list[tuple[re.Pattern, str, int, str]] = [
         SignalConfidence.LOW,
         "Mentions crowdfunding",
     ),
+        # --- Expanded PUBLIC_LFA patterns ---
+    # Explicit requests for comic / manga / webtoon / webcomic artists.
+    (
+        re.compile(
+            r"\b(?:looking for|need|seeking|searching for|want|hire|hiring)\b"
+            r"[^.\n]{0,40}\b(?:comic|manga|webtoon|webcomic|comic book)\b"
+            r"[^.\n]{0,20}\b(?:artist|illustrator|drawer)\b",
+            re.I,
+        ),
+        SignalType.PUBLIC_LFA,
+        SignalConfidence.HIGH,
+        "Seeking a comic/manga/webtoon artist",
+    ),
+    (
+        re.compile(
+            r"\b(?:looking for|need|seeking|searching for|want|hire|hiring)\b"
+            r"[^.\n]{0,40}\b(?:character designer|concept artist|cover artist|storyboard artist|"
+            r"digital artist|illustrator|visual designer|logo designer|poster designer|"
+            r"book cover designer|thumbnail designer|photoshop artist|album cover artist)\b",
+            re.I,
+        ),
+        SignalType.PUBLIC_LFA,
+        SignalConfidence.HIGH,
+        "Seeking a specific type of artist",
+    ),
+    # "Need someone to draw / illustrate / design X".
+    (
+        re.compile(
+            r"\b(?:need|want|looking for)\b[^.\n]{0,30}"
+            r"\b(?:someone to|an? artist to|an? illustrator to)\b"
+            r"[^.\n]{0,40}\b(?:draw|illustrate|design|bring .{0,20} to life|create)\b",
+            re.I,
+        ),
+        SignalType.PUBLIC_LFA,
+        SignalConfidence.HIGH,
+        "Needs someone to draw/illustrate/design",
+    ),
+    # "Does anyone draw / anyone here who can draw / can someone illustrate".
+    (
+        re.compile(
+            r"\b(?:any(?:one)?|anybody|someone|any artists?)\b"
+            r"[^.\n]{0,20}\b(?:here )?(?:who can |that can |available|interested in )?"
+            r"(?:draw|illustrate|design|do commissions|do character art)\b",
+            re.I,
+        ),
+        SignalType.PUBLIC_LFA,
+        SignalConfidence.MEDIUM,
+        "Asking if anyone can draw/illustrate/commission",
+    ),
+    # "Who can draw this / who does character art / does anyone do commissions".
+    (
+        re.compile(
+            r"\b(?:who can (?:draw|illustrate)|who does (?:character art|commissions)|"
+            r"does anyone (?:do commissions|draw|take commissions))\b",
+            re.I,
+        ),
+        SignalType.PUBLIC_LFA,
+        SignalConfidence.HIGH,
+        "Directly soliciting art services",
+    ),
+    # "I have a project/idea that needs an artist".
+    (
+        re.compile(
+            r"\b(?:i have|i've got)\b[^.\n]{0,40}\b(?:project|comic|idea|story|series)\b"
+            r"[^.\n]{0,40}\b(?:need(?:s)?|looking for|requires?)\b[^.\n]{0,20}\b(?:artist|illustrator|art)\b",
+            re.I,
+        ),
+        SignalType.PUBLIC_LFA,
+        SignalConfidence.HIGH,
+        "Project with stated need for an artist",
+    ),
+    # "I need help with the visuals / need someone with drawing skills".
+    (
+        re.compile(
+            r"\b(?:need help with (?:the )?visuals|need someone with drawing skills|"
+            r"need an? (?:artist|illustrator) (?:asap|urgently|right away))\b",
+            re.I,
+        ),
+        SignalType.PUBLIC_LFA,
+        SignalConfidence.HIGH,
+        "Needs visual / drawing help (incl. urgent)",
+    ),
+
+    # --- Explicit SEEKING_COLLAB patterns ---
+    # Partnership-framed requests: "art partner", "regular artist", "team", "long-term".
+    (
+        re.compile(
+            r"\b(?:looking for|seeking|want|need)\b[^.\n]{0,40}"
+            r"\b(?:art partner|regular artist|long[- ]term (?:collaboration|artist|partner)|"
+            r"art(?:ist)? team|team of artists|artists to join|"
+            r"ongoing (?:project|collaboration|artist))\b",
+            re.I,
+        ),
+        SignalType.SEEKING_COLLAB,
+        SignalConfidence.HIGH,
+        "Seeking a partnership / long-term / team collaboration",
+    ),
+    # "Artist for multiple projects / upcoming series / upcoming project".
+    (
+        re.compile(
+            r"\b(?:artist|illustrator)\b[^.\n]{0,40}"
+            r"\b(?:for (?:multiple|several|upcoming|next) (?:projects?|series|comic|webtoon))\b",
+            re.I,
+        ),
+        SignalType.SEEKING_COLLAB,
+        SignalConfidence.HIGH,
+        "Artist needed for upcoming / multiple projects",
+    ),
+
+    # --- BUDGET_SIGNAL patterns (new signal type) ---
+    # Any mention of pay, rates, budget, per-page pricing, paid position.
+    (
+        re.compile(
+            r"\b(?:budget (?:is|of|around)|paying \$|\$\d+ ?(?:per|/|a) ?(?:page|illustration|piece|image)|"
+            r"rate per (?:page|illustration)|\$\d+|paid (?:per|position|freelance|work)|"
+            r"seeking a paid artist|artist budget|commission budget|payment upfront|"
+            r"paying well|competitive pay|paid gig)\b",
+            re.I,
+        ),
+        SignalType.BUDGET_SIGNAL,
+        SignalConfidence.HIGH,
+        "Mentions budget / pay / rates",
+    ),
 ]
 
 

@@ -69,6 +69,7 @@ class SignalType(models.TextChoices):
     ARTIST_INTEREST = "artist_interest", "Interacting with multiple artists"
     BETWEEN_PROJECTS = "between_projects", "Between projects / just finished"
     PUBLIC_LFA = "public_lfa", "Public 'looking for artist' post"
+    BUDGET_SIGNAL = "budget_signal", "Mentions budget / pay / rates"
     OTHER = "other", "Other"
 
 

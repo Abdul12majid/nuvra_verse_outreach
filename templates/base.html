@@ -19,10 +19,9 @@
   <div class="container-fluid">
     <a class="navbar-brand" href="/">Comic Outreach</a>
     <div class="navbar-nav">
-      <a class="nav-link" href="/">Dashboard</a>
-      <a class="nav-link" href="/leads/">Leads</a>
-      <a class="nav-link" href="/signals/">Signals</a>
-      <a class="nav-link" href="/outreach/">Outreach</a>
+      <a class="nav-link" href="{% url 'core:dashboard' %}">Dashboard</a>
+      <a class="nav-link" href="{% url 'core:lead_list' %}">Leads</a>
+      <a class="nav-link" href="{% url 'core:signal_list' %}">Signals</a>
       <a class="nav-link" href="/admin/">Admin</a>
     </div>
   </div>
