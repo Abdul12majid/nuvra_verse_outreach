@@ -100,3 +100,26 @@ def record_signal(
         lead.save(update_fields=["signal_count", "signal_score", "updated_at"])
 
     return signal, created
+
+
+@transaction.atomic
+def approve_outreach(outreach) -> None:
+    """
+    Human has approved an outreach. Currently this only marks it SENT for
+    manual channels. Automated channels will be wired in Stage 6.
+
+    For manual channels, "approval" means the human will send it themselves
+    outside the system — we record it as SENT so the audit trail is accurate.
+    """
+    from .models import SendStatus
+    outreach.status = SendStatus.SENT
+    outreach.sent_at = timezone.now()
+    outreach.save(update_fields=["status", "sent_at", "updated_at"])
+
+
+@transaction.atomic
+def reject_outreach(outreach, reason: str = "") -> None:
+    from .models import SendStatus
+    outreach.status = SendStatus.SKIPPED
+    outreach.error_message = reason or "Rejected by human reviewer"
+    outreach.save(update_fields=["status", "error_message", "updated_at"])
