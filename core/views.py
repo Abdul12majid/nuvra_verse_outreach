@@ -3,6 +3,9 @@ from django.db.models import Count, Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.utils import timezone
+from .outreach import draft_outreach, queue_for_approval
+from .services import approve_outreach, reject_outreach
+from .models import OutreachChannel, SendStatus
 
 from .models import Lead, Signal, LeadStatus, Source, SignalType, OutreachLog, Response
 
@@ -137,3 +140,69 @@ def signal_list(request):
         "q": q,
     }
     return render(request, "core/signal_list.html", context)
+
+
+
+def lead_draft_outreach(request, pk):
+    """
+    Generate a draft for this lead. Shown as a preview on the lead detail page.
+    If `commit=1` in POST, writes an OutreachLog in AWAITING_APPROVAL.
+    """
+    lead = get_object_or_404(Lead, pk=pk)
+    if request.method != "POST":
+        return redirect("core:lead_detail", pk=lead.pk)
+
+    channel = request.POST.get("channel") or OutreachChannel.DISCORD_DM
+    result = draft_outreach(
+        lead,
+        channel=channel,
+        sender_name="Your Name",  # ← replace with a real setting later
+        portfolio_url="https://your-portfolio.example",
+    )
+
+    if result.blocked_reason:
+        messages.warning(request, f"Cannot draft: {result.blocked_reason}")
+        return redirect("core:lead_detail", pk=lead.pk)
+
+    if request.POST.get("commit") == "1":
+        outreach = queue_for_approval(lead, result, channel=channel)
+        messages.success(request, f"Draft queued for approval (#{outreach.pk}).")
+        return redirect("core:lead_detail", pk=lead.pk)
+
+    # Preview-only: stash in session and render the lead detail page with a preview panel.
+    request.session[f"draft_preview_{lead.pk}"] = {
+        "subject": result.subject,
+        "body": result.body,
+        "channel": channel,
+    }
+    return redirect("core:lead_detail", pk=lead.pk)
+
+
+def approval_queue(request):
+    """
+    Every outreach in AWAITING_APPROVAL state, newest first.
+    """
+    items = (
+        OutreachLog.objects
+        .filter(status=SendStatus.AWAITING_APPROVAL)
+        .select_related("lead", "signal")
+        .order_by("-created_at")
+    )
+    return render(request, "core/approval_queue.html", {"items": items})
+
+
+def approve_outreach_view(request, pk):
+    outreach = get_object_or_404(OutreachLog, pk=pk)
+    if request.method == "POST":
+        approve_outreach(outreach)
+        messages.success(request, "Approved.")
+    return redirect(request.POST.get("next") or "core:approval_queue")
+
+
+def reject_outreach_view(request, pk):
+    outreach = get_object_or_404(OutreachLog, pk=pk)
+    if request.method == "POST":
+        reason = request.POST.get("reason", "")
+        reject_outreach(outreach, reason)
+        messages.success(request, "Rejected.")
+    return redirect(request.POST.get("next") or "core:approval_queue")
