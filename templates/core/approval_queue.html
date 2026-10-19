@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Outreach approval — Comic Outreach{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Outreach approval</h1>
+  <span class="text-muted">{{ items|length }} awaiting</span>
+</div>
+
+{% for item in items %}
+<div class="card mb-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <div>
+      <strong><a href="{% url 'core:lead_detail' item.lead.pk %}">{{ item.lead.display_name|default:item.lead.source_uid }}</a></strong>
+      <span class="badge bg-secondary signal-badge ms-2">{{ item.get_channel_display }}</span>
+      <span class="badge bg-light text-dark signal-badge">{{ item.get_send_method_display }}</span>
+    </div>
+    <small class="text-muted">#{{ item.pk }} &middot; {{ item.created_at|date:"Y-m-d H:i" }}</small>
+  </div>
+  <div class="card-body">
+    {% if item.signal %}
+    <div class="small text-muted mb-2">
+      Based on signal: <span class="badge bg-info signal-badge">{{ item.signal.get_signal_type_display }}</span>
+      {% if item.signal.evidence %}<em>"{{ item.signal.evidence|truncatechars:80 }}"</em>{% endif %}
+    </div>
+    {% endif %}
+    <p class="mb-1"><strong>Subject:</strong> {{ item.subject }}</p>
+    <pre class="mb-3" style="white-space: pre-wrap; font-family: inherit;">{{ item.body }}</pre>
+
+    <div class="d-flex gap-2">
+      <form method="post" action="{% url 'core:approve_outreach' item.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'core:approval_queue' %}">
+        <button class="btn btn-success">Approve (mark sent)</button>
+      </form>
+      <form method="post" action="{% url 'core:reject_outreach' item.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'core:approval_queue' %}">
+        <button class="btn btn-outline-danger">Reject</button>
+      </form>
+      <button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.querySelector('#copy-{{ item.pk }}').textContent)">
+        Copy body
+      </button>
+      <span id="copy-{{ item.pk }}" class="visually-hidden">{{ item.body }}</span>
+    </div>
+  </div>
+</div>
+{% empty %}
+<div class="alert alert-info">No outreach awaiting approval.</div>
+{% endfor %}
+{% endblock %}

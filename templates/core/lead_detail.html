@@ -52,6 +52,21 @@
       </div>
     </div>
 
+    <div class="card mb-3">
+      <div class="card-header"><strong>Draft outreach</strong></div>
+      <div class="card-body">
+        <form method="post" action="{% url 'core:lead_draft_outreach' lead.pk %}">
+          {% csrf_token %}
+          <select name="channel" class="form-select form-select-sm mb-2">
+            {% for value, label in channels %}
+              <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-sm btn-outline-primary w-100">Preview draft</button>
+        </form>
+      </div>
+    </div>
+
     {% if lead.bio %}
     <div class="card">
       <div class="card-header"><strong>Bio</strong></div>
@@ -59,6 +74,24 @@
     </div>
     {% endif %}
   </div>
+
+  {% if draft_preview %}
+  <div class="card mb-3 border-primary">
+    <div class="card-header bg-primary text-white"><strong>Draft preview</strong></div>
+    <div class="card-body">
+      <p class="mb-1"><strong>Subject:</strong> {{ draft_preview.subject }}</p>
+      <hr>
+      <pre class="mb-2" style="white-space: pre-wrap; font-family: inherit;">{{ draft_preview.body }}</pre>
+      <form method="post" action="{% url 'core:lead_draft_outreach' lead.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="channel" value="{{ draft_preview.channel }}">
+        <input type="hidden" name="commit" value="1">
+        <button class="btn btn-primary">Queue for approval</button>
+        <a href="{% url 'core:lead_detail' lead.pk %}" class="btn btn-outline-secondary">Discard</a>
+      </form>
+    </div>
+  </div>
+  {% endif %}
 
   <div class="col-lg-8">
     <div class="card mb-3">

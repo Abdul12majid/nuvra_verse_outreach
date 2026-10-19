@@ -89,6 +89,7 @@ def lead_detail(request, pk):
     signals = lead.signals.order_by("-detected_at")
     outreaches = lead.outreaches.order_by("-created_at")
     responses = lead.responses.order_by("-received_at")
+    draft_preview = request.session.pop(f"draft_preview_{lead.pk}", None)
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -107,6 +108,8 @@ def lead_detail(request, pk):
         "responses": responses,
         "statuses": LeadStatus.choices,
         "username": (lead.raw_data or {}).get("username", ""),
+        "draft_preview": draft_preview,
+        "channels": OutreachChannel.choices,
     }
     return render(request, "core/lead_detail.html", context)
 
