@@ -53,6 +53,9 @@ def upsert_lead(
     return lead
 
 
+
+from .notifications import send_pushover_notification
+
 @transaction.atomic
 def record_signal(
     *,
@@ -98,6 +101,16 @@ def record_signal(
         lead.signal_count = agg_count
         lead.signal_score = agg_score
         lead.save(update_fields=["signal_count", "signal_score", "updated_at"])
+        # Send notification
+        lead_name = lead.display_name or lead.source_uid
+        # Push notification
+        from .notifications import send_pushover_notification
+        lead_name = lead.display_name or lead.source_uid
+        send_pushover_notification(
+            title="New Lead Signal",
+            message=f"{signal_type} — {lead_name}",
+            url=source_url or "",
+        )
 
     return signal, created
 
